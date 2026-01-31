@@ -1,7 +1,7 @@
 import { BaseChainAdapter } from './base';
 import { ChainInfo, FetchOptions, FetchResult, NormalizedTransaction } from '../types';
 
-const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
 interface ArbiscanTxResponse {
   status: string;
