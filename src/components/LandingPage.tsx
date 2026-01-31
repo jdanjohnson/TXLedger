@@ -29,10 +29,10 @@ export function LandingPage({ onFetch }: LandingPageProps) {
             </div>
             <h2 className="text-xl font-bold tracking-tight grotesk-tight text-slate-900">TXLedger</h2>
           </div>
-          <nav className="hidden md:flex items-center gap-10">
-            <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors" href="https://github.com/jdanjohnson/TXLedger" target="_blank" rel="noopener noreferrer">GitHub</a>
-            <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors" href="#">Docs</a>
-            <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors" href="#">API</a>
+          <nav className="hidden md:flex items-center space-x-10">
+            <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap" href="https://github.com/jdanjohnson/TXLedger" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap" href="#">Docs</a>
+            <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap" href="#">API</a>
           </nav>
           <div className="flex items-center gap-4">
             <a 
