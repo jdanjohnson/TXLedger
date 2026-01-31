@@ -153,6 +153,26 @@ function App() {
     );
   };
 
+  const getPerpsTagBadge = (tag: string) => {
+    const colors: Record<string, string> = {
+      open_position: 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
+      close_position: 'bg-purple-500/10 text-purple-600 border border-purple-500/20',
+      funding_payment: 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
+    };
+    const labels: Record<string, string> = {
+      open_position: 'Open',
+      close_position: 'Close',
+      funding_payment: 'Funding',
+    };
+    return (
+      <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${colors[tag] || 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+        {labels[tag] || tag}
+      </span>
+    );
+  };
+
+  const isPerpsChain = selectedChainInfo?.isPerps || false;
+
   const SortIcon = ({ column }: { column: string }) => {
     if (sortBy !== column) return <ArrowUpDown className="h-3.5 w-3.5 ml-1 opacity-40" />;
     return sortOrder === 'asc' ? 
@@ -390,13 +410,13 @@ function App() {
                         <SortIcon column="type" />
                       </div>
                     </TableHead>
-                    <TableHead className="py-4 px-6 font-bold">Direction</TableHead>
+                    <TableHead className="py-4 px-6 font-bold">{isPerpsChain ? 'Position' : 'Direction'}</TableHead>
                     <TableHead 
                       className="py-4 px-6 font-bold text-right cursor-pointer hover:text-slate-900"
                       onClick={() => handleSort('amount')}
                     >
                       <div className="flex items-center justify-end">
-                        Value
+                        {isPerpsChain ? 'Size' : 'Value'}
                         <SortIcon column="amount" />
                       </div>
                     </TableHead>
@@ -409,6 +429,17 @@ function App() {
                         <SortIcon column="asset" />
                       </div>
                     </TableHead>
+                    {isPerpsChain && (
+                      <TableHead 
+                        className="py-4 px-6 font-bold text-right cursor-pointer hover:text-slate-900"
+                        onClick={() => handleSort('pnl')}
+                      >
+                        <div className="flex items-center justify-end">
+                          P&L
+                          <SortIcon column="pnl" />
+                        </div>
+                      </TableHead>
+                    )}
                     <TableHead 
                       className="py-4 px-6 font-bold text-right cursor-pointer hover:text-slate-900"
                       onClick={() => handleSort('fee')}
@@ -443,7 +474,7 @@ function App() {
                         <span className="text-[12px] font-semibold text-slate-700">{tx.type}</span>
                       </TableCell>
                       <TableCell className="py-4 px-6 whitespace-nowrap">
-                        {getDirectionBadge(tx.direction)}
+                        {isPerpsChain && tx.tag ? getPerpsTagBadge(tx.tag) : getDirectionBadge(tx.direction)}
                       </TableCell>
                       <TableCell className="py-4 px-6 text-right whitespace-nowrap">
                         <span className={`text-[13px] tabular font-semibold ${tx.direction === 'in' ? 'text-emerald-600' : tx.direction === 'out' ? 'text-slate-900' : 'text-slate-600'}`}>
@@ -453,6 +484,13 @@ function App() {
                       <TableCell className="py-4 px-6 whitespace-nowrap">
                         <span className="text-[10px] font-bold text-slate-500 px-2 py-0.5 bg-slate-100 rounded-md font-mono">{tx.asset}</span>
                       </TableCell>
+                      {isPerpsChain && (
+                        <TableCell className="py-4 px-6 text-right whitespace-nowrap">
+                          <span className={`text-[13px] tabular font-semibold ${parseFloat(tx.pnl || '0') > 0 ? 'text-emerald-600' : parseFloat(tx.pnl || '0') < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                            {parseFloat(tx.pnl || '0') > 0 ? '+' : ''}{parseFloat(tx.pnl || '0').toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                          </span>
+                        </TableCell>
+                      )}
                       <TableCell className="py-4 px-6 text-right whitespace-nowrap">
                         <span className="text-[13px] tabular text-slate-400 font-medium">
                           {parseFloat(tx.fee).toLocaleString(undefined, { maximumFractionDigits: 8 })}
@@ -583,6 +621,14 @@ function App() {
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fee</label>
                   <div className="font-mono text-slate-900">{selectedTx.fee} {selectedTx.feeAsset}</div>
                 </div>
+                {isPerpsChain && selectedTx.pnl && parseFloat(selectedTx.pnl) !== 0 && (
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Realized P&L</label>
+                    <div className={`font-mono font-semibold ${parseFloat(selectedTx.pnl) > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      {parseFloat(selectedTx.pnl) > 0 ? '+' : ''}{parseFloat(selectedTx.pnl).toLocaleString(undefined, { maximumFractionDigits: 2 })} {selectedTx.paymentToken || selectedTx.feeAsset}
+                    </div>
+                  </div>
+                )}
               </div>
               
               {selectedTx.notes && (

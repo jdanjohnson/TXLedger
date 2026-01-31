@@ -7,7 +7,10 @@ export interface ChainInfo {
   addressRegex: RegExp;
   addressPlaceholder: string;
   limited?: boolean;
+  isPerps?: boolean;
 }
+
+export type PerpsTag = 'open_position' | 'close_position' | 'funding_payment';
 
 export interface NormalizedTransaction {
   chainId: string;
@@ -27,6 +30,7 @@ export interface NormalizedTransaction {
   notes: string;
   tag: string;
   pnl: string;
+  paymentToken?: string;
   rawDetails?: Record<string, unknown>;
 }
 
