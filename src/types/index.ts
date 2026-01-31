@@ -6,6 +6,7 @@ export interface ChainInfo {
   explorerUrl: string;
   addressRegex: RegExp;
   addressPlaceholder: string;
+  limited?: boolean;
 }
 
 export interface NormalizedTransaction {
