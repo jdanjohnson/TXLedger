@@ -3,24 +3,41 @@ import { ChainInfo, FetchOptions, FetchResult, NormalizedTransaction } from '../
 
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
-interface ArbiscanTxResponse {
-  status: string;
-  message: string;
-  result: Array<{
-    blockNumber: string;
-    timeStamp: string;
+interface BlockscoutTx {
+  hash: string;
+  block_number: number;
+  timestamp: string;
+  from: {
     hash: string;
-    from: string;
-    to: string;
+    name?: string;
+  };
+  to: {
+    hash: string;
+    name?: string;
+  } | null;
+  value: string;
+  fee: {
     value: string;
-    gas: string;
-    gasPrice: string;
-    gasUsed: string;
-    isError: string;
-    input: string;
-    methodId: string;
-    functionName: string;
-  }>;
+  };
+  gas_used: string;
+  gas_price: string;
+  status: string;
+  result: string;
+  method: string | null;
+  decoded_input?: {
+    method_call: string;
+    method_id: string;
+  };
+  raw_input: string;
+}
+
+interface BlockscoutResponse {
+  items: BlockscoutTx[];
+  next_page_params?: {
+    block_number: number;
+    index: number;
+    items_count: number;
+  };
 }
 
 // Variational Protocol contract addresses on Arbitrum
@@ -55,34 +72,27 @@ export class VariationalAdapter extends BaseChainAdapter {
     addressPlaceholder: '0x742d35Cc6634C0532925a3b844Bc9e7595f...',
   };
 
-  // Arbiscan API (free tier: 5 calls/sec)
-  private apiBase = 'https://api.arbiscan.io/api';
-  
-  // Note: For production, you should use an environment variable for the API key
-  // Free tier works without API key but has lower rate limits
-  private apiKey = '';
+  private apiBase = 'https://arbitrum.blockscout.com/api/v2';
 
   async fetchTransactions(address: string, options?: FetchOptions): Promise<FetchResult> {
-    const page = options?.cursor ? parseInt(options.cursor) : 1;
-    const limit = options?.limit || 100;
-
     try {
-      // Fetch all transactions for the address
-      const allTxs = await this.fetchFromArbiscan(address, page, limit);
+      const allTxs = await this.fetchFromBlockscout(address, options?.cursor);
       
-      // Filter to only include transactions interacting with Variational contracts
-      const variationalTxs = allTxs.filter(tx => this.isVariationalTx(tx));
+      const variationalTxs = allTxs.items.filter(tx => this.isVariationalTx(tx));
       
-      // Normalize transactions
       const transactions: NormalizedTransaction[] = variationalTxs.map(tx => 
         this.normalizeTx(tx, address)
       );
 
-      const hasMore = allTxs.length === limit;
+      const hasMore = !!allTxs.next_page_params;
+      let nextCursor: string | undefined;
+      if (allTxs.next_page_params) {
+        nextCursor = JSON.stringify(allTxs.next_page_params);
+      }
 
       return {
         transactions,
-        nextCursor: hasMore ? String(page + 1) : undefined,
+        nextCursor,
         hasMore,
         totalCount: undefined,
       };
@@ -92,75 +102,61 @@ export class VariationalAdapter extends BaseChainAdapter {
     }
   }
 
-  private async fetchFromArbiscan(
+  private async fetchFromBlockscout(
     address: string,
-    page: number,
-    limit: number
-  ): Promise<ArbiscanTxResponse['result']> {
-    const params = new URLSearchParams({
-      module: 'account',
-      action: 'txlist',
-      address,
-      page: String(page),
-      offset: String(limit),
-      sort: 'desc',
-    });
-
-    if (this.apiKey) {
-      params.append('apikey', this.apiKey);
+    cursor?: string
+  ): Promise<BlockscoutResponse> {
+    let url = `${this.apiBase}/addresses/${address}/transactions`;
+    
+    if (cursor) {
+      try {
+        const params = JSON.parse(cursor);
+        const searchParams = new URLSearchParams();
+        if (params.block_number) searchParams.set('block_number', params.block_number);
+        if (params.index) searchParams.set('index', params.index);
+        if (params.items_count) searchParams.set('items_count', params.items_count);
+        url += `?${searchParams.toString()}`;
+      } catch {
+        // Invalid cursor, ignore
+      }
     }
-
-    const url = `${this.apiBase}?${params.toString()}`;
     
     const response = await fetch(CORS_PROXY + encodeURIComponent(url), {
       headers: { 'Accept': 'application/json' },
     });
 
     if (!response.ok) {
-      throw new Error(`Arbiscan API error: ${response.status}`);
+      throw new Error(`Blockscout API error: ${response.status}`);
     }
 
-    const data: ArbiscanTxResponse = await response.json();
-    
-    if (data.status !== '1') {
-      if (data.message === 'No transactions found' || data.message === 'OK') {
-        return [];
-      }
-      throw new Error(data.message || 'Arbiscan API error');
-    }
-
-    return data.result || [];
+    const data: BlockscoutResponse = await response.json();
+    return data;
   }
 
-  private isVariationalTx(tx: ArbiscanTxResponse['result'][0]): boolean {
-    const to = tx.to?.toLowerCase() || '';
-    const from = tx.from?.toLowerCase() || '';
+  private isVariationalTx(tx: BlockscoutTx): boolean {
+    const to = tx.to?.hash?.toLowerCase() || '';
+    const from = tx.from?.hash?.toLowerCase() || '';
     
-    // Check if transaction involves Variational contracts
     const variationalAddresses = Object.values(VARIATIONAL_CONTRACTS).map(a => a.toLowerCase());
     
     return variationalAddresses.includes(to) || variationalAddresses.includes(from);
   }
 
   private normalizeTx(
-    tx: ArbiscanTxResponse['result'][0],
+    tx: BlockscoutTx,
     address: string
   ): NormalizedTransaction {
-    const from = tx.from?.toLowerCase() || '';
-    const to = tx.to?.toLowerCase() || '';
+    const from = tx.from?.hash?.toLowerCase() || '';
+    const to = tx.to?.hash?.toLowerCase() || '';
     const isOutgoing = from === address.toLowerCase();
     const isSelf = from === to;
 
-    // Determine transaction type from method signature
-    const methodId = tx.methodId || tx.input?.slice(0, 10) || '0x';
-    const type = this.determineType(methodId, tx.functionName);
+    const methodId = tx.decoded_input?.method_id || tx.raw_input?.slice(0, 10) || '0x';
+    const methodName = tx.method || tx.decoded_input?.method_call?.split('(')[0] || '';
+    const type = this.determineType(methodId, methodName);
 
-    // Calculate fee
-    const gasUsed = BigInt(tx.gasUsed || '0');
-    const gasPrice = BigInt(tx.gasPrice || '0');
-    const fee = this.formatWei((gasUsed * gasPrice).toString());
+    const fee = this.formatWei(tx.fee?.value || '0');
 
-    // Determine direction based on type
     let direction: 'in' | 'out' | 'self' | 'unknown' = 'unknown';
     if (isSelf) {
       direction = 'self';
@@ -172,16 +168,15 @@ export class VariationalAdapter extends BaseChainAdapter {
       direction = isOutgoing ? 'out' : 'in';
     }
 
-    // Determine counterparty
     let counterparty = isOutgoing ? to : from;
-    if (this.isVariationalContract(to)) {
-      counterparty = this.getContractName(to);
+    if (tx.to && this.isVariationalContract(tx.to.hash)) {
+      counterparty = this.getContractName(tx.to.hash);
     }
 
     return {
       chainId: this.chainInfo.id,
       address,
-      datetimeUtc: new Date(parseInt(tx.timeStamp) * 1000).toISOString(),
+      datetimeUtc: tx.timestamp,
       hash: tx.hash,
       type,
       direction,
@@ -190,10 +185,10 @@ export class VariationalAdapter extends BaseChainAdapter {
       amount: this.formatWei(tx.value),
       fee,
       feeAsset: 'ETH',
-      status: tx.isError === '0' ? 'success' : 'failed',
-      block: tx.blockNumber,
+      status: tx.status === 'ok' ? 'success' : 'failed',
+      block: String(tx.block_number),
       explorerUrl: this.getExplorerUrl(tx.hash),
-      notes: tx.functionName || '',
+      notes: methodName,
       tag: this.getTag(type),
       pnl: '',
       rawDetails: tx as unknown as Record<string, unknown>,
