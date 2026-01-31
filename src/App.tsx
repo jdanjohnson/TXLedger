@@ -131,7 +131,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen liquid-bg">
+    <div className="min-h-screen relative">
       <header className="glass border-b border-white/20 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
