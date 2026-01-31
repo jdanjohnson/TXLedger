@@ -1,8 +1,6 @@
 import { BaseChainAdapter } from './base';
 import { ChainInfo, FetchOptions, FetchResult, NormalizedTransaction } from '../types';
 
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
-
 interface BlockscoutTx {
   hash: string;
   block_number: number;
@@ -121,7 +119,7 @@ export class VariationalAdapter extends BaseChainAdapter {
       }
     }
     
-    const response = await fetch(CORS_PROXY + encodeURIComponent(url), {
+    const response = await fetch(url, {
       headers: { 'Accept': 'application/json' },
     });
 
