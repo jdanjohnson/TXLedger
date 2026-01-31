@@ -144,7 +144,7 @@ function App() {
                 <SelectValue placeholder="Select chain" />
               </SelectTrigger>
               <SelectContent>
-                {chains.map(chain => (
+                {[...chains].sort((a, b) => (a.limited ? 1 : 0) - (b.limited ? 1 : 0)).map(chain => (
                   <SelectItem key={chain.id} value={chain.id}>
                     <div className="flex items-center gap-2">
                       <img src={chain.logo} alt={chain.name} className="w-5 h-5 rounded-full" />
