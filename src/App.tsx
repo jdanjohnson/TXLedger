@@ -96,6 +96,13 @@ function App() {
     setViewMode('landing');
   };
 
+  const handleChainChange = (newChain: string) => {
+    setSelectedChain(newChain);
+    setAddress('');
+    setSelectedTx(null);
+    setViewMode('landing');
+  };
+
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
     return date.toLocaleString('en-US', {
@@ -154,7 +161,7 @@ function App() {
   };
 
   if (viewMode === 'landing') {
-    return <LandingPage onFetch={handleFetchFromLanding} />;
+    return <LandingPage onFetch={handleFetchFromLanding} initialChain={selectedChain} />;
   }
 
   return (
@@ -179,7 +186,7 @@ function App() {
           </nav>
         </div>
         <div className="flex items-center gap-5">
-          <Select value={selectedChain} onValueChange={setSelectedChain}>
+          <Select value={selectedChain} onValueChange={handleChainChange}>
             <SelectTrigger className="w-40 h-8 text-xs border-slate-200 bg-white/50">
               <SelectValue placeholder="Select chain" />
             </SelectTrigger>

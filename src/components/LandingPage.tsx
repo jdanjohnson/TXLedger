@@ -4,11 +4,12 @@ import { getSupportedChains } from '../adapters';
 
 interface LandingPageProps {
   onFetch: (chain: string, address: string) => void;
+  initialChain?: string;
 }
 
-export function LandingPage({ onFetch }: LandingPageProps) {
+export function LandingPage({ onFetch, initialChain }: LandingPageProps) {
   const chains = getSupportedChains();
-  const [selectedChain, setSelectedChain] = useState(chains[0]?.id || '');
+  const [selectedChain, setSelectedChain] = useState(initialChain || chains[0]?.id || '');
   const [address, setAddress] = useState('');
   const [showChainDropdown, setShowChainDropdown] = useState(false);
 
@@ -47,7 +48,7 @@ export function LandingPage({ onFetch }: LandingPageProps) {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center -mt-16">
+      <main className="flex-1 flex flex-col items-center justify-center">
         <section className="w-full max-w-[1100px] px-8 flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full badge-glass mb-12">
             <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
@@ -56,8 +57,8 @@ export function LandingPage({ onFetch }: LandingPageProps) {
           
           <div className="flex flex-col gap-6 max-w-[850px]">
             <h1 className="text-6xl md:text-[92px] font-bold text-slate-900 grotesk-tight">
-              Transaction flow<br/>
-              <span className="opacity-30 italic font-light">refined as glass.</span>
+              Transact with<br/>
+              <span className="opacity-30 italic font-light">LIQUID CLARITY.</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed max-w-[620px] mx-auto mt-6">
               A multi-chain transaction explorer for AWAKE Tax. 
@@ -171,7 +172,7 @@ export function LandingPage({ onFetch }: LandingPageProps) {
       <footer className="w-full py-16">
         <div className="max-w-[1200px] mx-auto px-8 flex flex-col md:flex-row items-center justify-between border-t border-slate-200/50 pt-10">
           <div className="flex items-center gap-8 flex-wrap justify-center md:justify-start">
-            <span className="text-[12px] font-bold text-slate-400">© 2024 TXLedger</span>
+            <span className="text-[12px] font-bold text-slate-400">© 2026 TXLedger</span>
             <div className="flex items-center gap-6">
               <a className="text-[12px] font-bold text-slate-400 hover:text-slate-900 transition-colors" href="https://github.com/jdanjohnson/TXLedger" target="_blank" rel="noopener noreferrer">GitHub</a>
               <a className="text-[12px] font-bold text-slate-400 hover:text-slate-900 transition-colors" href="https://awaketax.com" target="_blank" rel="noopener noreferrer">AWAKE Tax</a>
