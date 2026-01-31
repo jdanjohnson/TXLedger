@@ -27,10 +27,6 @@ export class ExtendedAdapter implements ChainAdapter {
     addressPlaceholder: '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
   };
 
-  // Extended Exchange API endpoints
-  private extendedApiBase = 'https://api.starknet.extended.exchange/api/v1';
-  
-  // Voyager API for general Starknet transaction tracking
   private voyagerApiBase = 'https://api.voyager.online/beta';
 
   validateAddress(address: string): boolean {
