@@ -18,9 +18,9 @@ A multi-chain blockchain wallet transaction explorer that fetches, displays, and
 | Polkadot | Active | Subscan API | No |
 | Bittensor | Active | Taostats API | Yes (API Key) |
 | Ronin | Active | Ronin Explorer API | No |
-| Osmosis | Coming Soon | Numia API | Yes (API Key) |
-| Variational | Coming Soon | Arbitrum (Protocol) | TBD |
-| Extended | Coming Soon | Starknet (Protocol) | TBD |
+| Osmosis | Active | Cosmos LCD REST API | No |
+| Variational | Active | Arbiscan API | No (free tier) |
+| Extended | Active | Voyager/StarkScan API | No |
 
 ## Quick Start
 
@@ -65,12 +65,24 @@ Some chains require API keys for full functionality. You can configure these in 
    private apiKey = 'your-api-key-here';
    ```
 
-#### Osmosis (Numia API) - Coming Soon
+#### Osmosis (Cosmos LCD REST API)
 
-1. Get an API key from [Numia](https://numia.xyz)
-2. Endpoints available:
-   - RPC: `https://osmosis-rpc.numia.xyz`
-   - REST: `https://osmosis-lcd.numia.xyz`
+No API key required. Uses public Cosmos LCD REST endpoints with automatic failover:
+- `https://lcd.osmosis.zone`
+- `https://rest.osmosis.goldenratiostaking.net`
+- `https://osmosis-api.polkachu.com`
+
+#### Variational (Arbiscan API)
+
+Uses Arbiscan API free tier (5 calls/sec). For higher rate limits:
+1. Get an API key from [Arbiscan](https://arbiscan.io/apis)
+2. Update `src/adapters/variational.ts` with your API key
+
+#### Extended (Voyager/StarkScan API)
+
+No API key required. Uses public Starknet explorer APIs:
+- Primary: Voyager API
+- Fallback: StarkScan API
 
 ## Architecture
 
@@ -83,7 +95,9 @@ src/
 │   ├── polkadot.ts     # Polkadot (Subscan)
 │   ├── bittensor.ts    # Bittensor (Taostats)
 │   ├── ronin.ts        # Ronin (Explorer API)
-│   ├── osmosis.ts      # Osmosis (Numia) - Coming Soon
+│   ├── osmosis.ts      # Osmosis (Cosmos LCD REST)
+│   ├── variational.ts  # Variational (Arbiscan)
+│   ├── extended.ts     # Extended (Voyager/StarkScan)
 │   └── index.ts        # Adapter registry
 ├── types/              # TypeScript types
 │   └── index.ts        # Normalized transaction model
@@ -180,9 +194,9 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ## Roadmap
 
-- [ ] Osmosis chain support (Cosmos SDK)
-- [ ] Variational protocol support (Arbitrum)
-- [ ] Extended Exchange support (Starknet)
+- [x] Osmosis chain support (Cosmos SDK)
+- [x] Variational protocol support (Arbitrum)
+- [x] Extended Exchange support (Starknet)
 - [ ] User-configurable API keys via UI
 - [ ] Local storage for saved addresses
 - [ ] Transaction tagging and notes
