@@ -35,16 +35,6 @@ export function LandingPage({ onFetch, initialChain }: LandingPageProps) {
             <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap" href="#">Docs</a>
             <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap" href="#">API</a>
           </nav>
-          <div className="flex items-center gap-4">
-            <a 
-              href="https://awaketax.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="px-6 py-2.5 glass-button-action text-white text-[13px] font-semibold rounded-full"
-            >
-              AWAKE Tax
-            </a>
-          </div>
         </div>
       </header>
 
@@ -175,7 +165,7 @@ export function LandingPage({ onFetch, initialChain }: LandingPageProps) {
             <span className="text-[12px] font-bold text-slate-400">© 2026 TXLedger</span>
             <div className="flex items-center gap-6">
               <a className="text-[12px] font-bold text-slate-400 hover:text-slate-900 transition-colors" href="https://github.com/jdanjohnson/TXLedger" target="_blank" rel="noopener noreferrer">GitHub</a>
-              <a className="text-[12px] font-bold text-slate-400 hover:text-slate-900 transition-colors" href="https://awaketax.com" target="_blank" rel="noopener noreferrer">AWAKE Tax</a>
+              <a className="text-[12px] font-bold text-slate-400 hover:text-slate-900 transition-colors" href="https://jadanj.com/experiments" target="_blank" rel="noopener noreferrer">jadan.dev</a>
             </div>
           </div>
           <div className="flex items-center gap-8 mt-6 md:mt-0">

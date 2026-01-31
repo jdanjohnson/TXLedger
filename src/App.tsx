@@ -206,12 +206,12 @@ function App() {
           </Select>
           <div className="h-4 w-px bg-slate-200"></div>
           <a 
-            href="https://awaketax.com" 
+            href="https://jadanj.com/experiments" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-[11px] font-bold text-slate-500 hover:text-slate-900 transition-colors"
           >
-            AWAKE Tax
+            jadan.dev
           </a>
         </div>
       </header>
@@ -519,7 +519,7 @@ function App() {
           <span>TXLedger - GNU GPLv3 License</span>
           <div className="flex items-center gap-4">
             <a href="https://github.com/jdanjohnson/TXLedger" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors">GitHub</a>
-            <a href="https://awaketax.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors">AWAKE Tax</a>
+            <a href="https://jadanj.com/experiments" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors">jadan.dev</a>
           </div>
         </div>
       </footer>
