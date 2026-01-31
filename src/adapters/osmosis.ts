@@ -50,6 +50,7 @@ export class OsmosisAdapter implements ChainAdapter {
     explorerUrl: 'https://www.mintscan.io/osmosis',
     addressRegex: /^osmo1[a-z0-9]{38}$/,
     addressPlaceholder: 'osmo1clpqr4nrk4khgkxj78fcwwh6dl3uw4ep88n0y4',
+    limited: true,
   };
 
   // Multiple REST endpoints for failover (from cosmos chain-registry)

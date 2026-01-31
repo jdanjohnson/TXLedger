@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, Download, ExternalLink, ChevronDown, ChevronUp, X, Loader2, ArrowUpDown } from 'lucide-react';
+import { Search, Download, ExternalLink, ChevronDown, ChevronUp, X, Loader2, ArrowUpDown, Hourglass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -149,6 +149,12 @@ function App() {
                     <div className="flex items-center gap-2">
                       <img src={chain.logo} alt={chain.name} className="w-5 h-5 rounded-full" />
                       {chain.name}
+                      {chain.limited && (
+                        <span className="ml-1 flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded" title="Limited - requires backend proxy for full functionality">
+                          <Hourglass className="w-3 h-3" />
+                          <span className="hidden sm:inline">Coming Soon</span>
+                        </span>
+                      )}
                     </div>
                   </SelectItem>
                 ))}
