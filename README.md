@@ -13,14 +13,16 @@ A multi-chain blockchain wallet transaction explorer that fetches, displays, and
 
 ## Supported Chains
 
-| Chain | Status | API | Auth Required |
-|-------|--------|-----|---------------|
-| Polkadot | Active | Subscan API | No |
-| Bittensor | Active | Taostats API | Yes (API Key) |
-| Ronin | Active | Ronin Explorer API | No |
-| Osmosis | Coming Soon | Numia API | Yes (API Key) |
-| Variational | Coming Soon | Arbitrum (Protocol) | TBD |
-| Extended | Coming Soon | Starknet (Protocol) | TBD |
+| Chain | Status | API | Auth Required | CORS Support |
+|-------|--------|-----|---------------|--------------|
+| Polkadot | Active | Subscan API | No | Yes |
+| Bittensor | Active | Taostats API | Yes (API Key) | Yes |
+| Ronin | Active | Ronin Explorer API | No | Yes |
+| Variational | Active | Blockscout API | No | Yes |
+| Osmosis | Limited | Cosmos LCD REST API | No | No* |
+| Extended | Limited | Voyager/StarkScan API | No | No* |
+
+*Osmosis and Extended require a backend proxy for browser requests. See [CORS Limitations](#cors-limitations) below.
 
 ## Quick Start
 
@@ -65,12 +67,150 @@ Some chains require API keys for full functionality. You can configure these in 
    private apiKey = 'your-api-key-here';
    ```
 
-#### Osmosis (Numia API) - Coming Soon
+#### Osmosis (Cosmos LCD REST API)
 
-1. Get an API key from [Numia](https://numia.xyz)
-2. Endpoints available:
-   - RPC: `https://osmosis-rpc.numia.xyz`
-   - REST: `https://osmosis-lcd.numia.xyz`
+No API key required. Uses public Cosmos LCD REST endpoints with automatic failover:
+- `https://lcd.osmosis.zone`
+- `https://rest.osmosis.goldenratiostaking.net`
+- `https://osmosis-api.polkachu.com`
+
+#### Variational (Blockscout API)
+
+Uses Blockscout API for Arbitrum (free, no API key required). The adapter filters transactions to only show interactions with Variational protocol contracts:
+- Core OLP Vault: `0x74bbbb0e7f0bad6938509dd4b556a39a4db1f2cd`
+- Settlement Pool Factory: `0x0F820B9afC270d658a9fD7D16B1Bdc45b70f074C`
+
+#### Extended (Voyager/StarkScan API)
+
+**Note: Currently limited due to CORS restrictions.** See [CORS Limitations](#cors-limitations) for details.
+
+Uses public Starknet explorer APIs:
+- Primary: Voyager API
+- Fallback: StarkScan API
+
+## CORS Limitations
+
+Some blockchain APIs don't support CORS (Cross-Origin Resource Sharing), which prevents browser-based applications from making direct requests. This affects:
+
+### Affected Chains
+
+| Chain | API | Issue |
+|-------|-----|-------|
+| Osmosis | Cosmos LCD REST | No CORS headers on any public LCD endpoint |
+| Extended | Voyager/StarkScan | No CORS headers on Starknet explorer APIs |
+
+### How to Enable Full Support
+
+To enable full functionality for Osmosis and Extended, you need to set up a backend proxy. Here are the options:
+
+#### Option 1: Vercel Edge Functions (Recommended for Vercel deployments)
+
+Create `api/proxy.ts` in your project:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req: NextRequest) {
+  const url = req.nextUrl.searchParams.get('url');
+  if (!url) {
+    return NextResponse.json({ error: 'Missing url parameter' }, { status: 400 });
+  }
+
+  try {
+    const response = await fetch(url, {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await response.json();
+    return NextResponse.json(data, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      },
+    });
+  } catch (error) {
+    return NextResponse.json({ error: 'Proxy request failed' }, { status: 500 });
+  }
+}
+```
+
+Then update the adapters to use `/api/proxy?url=` instead of direct API calls.
+
+#### Option 2: Cloudflare Workers
+
+Deploy a simple proxy worker:
+
+```javascript
+addEventListener('fetch', event => {
+  event.respondWith(handleRequest(event.request));
+});
+
+async function handleRequest(request) {
+  const url = new URL(request.url);
+  const targetUrl = url.searchParams.get('url');
+  
+  if (!targetUrl) {
+    return new Response('Missing url parameter', { status: 400 });
+  }
+
+  const response = await fetch(targetUrl);
+  const newResponse = new Response(response.body, response);
+  newResponse.headers.set('Access-Control-Allow-Origin', '*');
+  return newResponse;
+}
+```
+
+#### Option 3: Self-hosted Proxy
+
+Run a simple Express proxy server:
+
+```javascript
+const express = require('express');
+const cors = require('cors');
+const fetch = require('node-fetch');
+
+const app = express();
+app.use(cors());
+
+app.get('/proxy', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).json({ error: 'Missing url' });
+  
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Proxy failed' });
+  }
+});
+
+app.listen(3001);
+```
+
+### Updating Adapters to Use Proxy
+
+Once you have a proxy set up, update the adapter files:
+
+**For Osmosis (`src/adapters/osmosis.ts`):**
+```typescript
+// Change from:
+const response = await fetch(url);
+
+// To:
+const PROXY_URL = '/api/proxy?url=';
+const response = await fetch(PROXY_URL + encodeURIComponent(url));
+```
+
+**For Extended (`src/adapters/extended.ts`):**
+```typescript
+// Same pattern - prepend your proxy URL to API requests
+const PROXY_URL = '/api/proxy?url=';
+const response = await fetch(PROXY_URL + encodeURIComponent(url));
+```
 
 ## Architecture
 
@@ -83,7 +223,9 @@ src/
 │   ├── polkadot.ts     # Polkadot (Subscan)
 │   ├── bittensor.ts    # Bittensor (Taostats)
 │   ├── ronin.ts        # Ronin (Explorer API)
-│   ├── osmosis.ts      # Osmosis (Numia) - Coming Soon
+│   ├── osmosis.ts      # Osmosis (Cosmos LCD REST)
+│   ├── variational.ts  # Variational (Arbiscan)
+│   ├── extended.ts     # Extended (Voyager/StarkScan)
 │   └── index.ts        # Adapter registry
 ├── types/              # TypeScript types
 │   └── index.ts        # Normalized transaction model
@@ -154,6 +296,9 @@ Use these addresses to test the application:
 - **Polkadot**: `16ZL8yLyXv3V3L3z9ofR1ovFLziyXaN1DPq4yffMAZ9czzBD`
 - **Bittensor**: `5FFApaS75bv5pJHfAp2FVLBj9ZaXuFDjEypsaBNc1wCfe52v`
 - **Ronin**: `0xa8754b9fa15fc18bb59458815510e40a12cd2014`
+- **Variational**: `0x74bbbb0e7f0bad6938509dd4b556a39a4db1f2cd` (OLP Vault contract)
+- **Osmosis**: `osmo1z0sh4s80u99l6y9d3vfy582p8jejeeu6tcucs2` (requires proxy)
+- **Extended**: `0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d` (requires proxy)
 
 ## Tech Stack
 
@@ -180,9 +325,9 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ## Roadmap
 
-- [ ] Osmosis chain support (Cosmos SDK)
-- [ ] Variational protocol support (Arbitrum)
-- [ ] Extended Exchange support (Starknet)
+- [x] Osmosis chain support (Cosmos SDK)
+- [x] Variational protocol support (Arbitrum)
+- [x] Extended Exchange support (Starknet)
 - [ ] User-configurable API keys via UI
 - [ ] Local storage for saved addresses
 - [ ] Transaction tagging and notes
