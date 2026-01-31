@@ -1,5 +1,7 @@
 import { ChainAdapter, ChainInfo, FetchOptions, FetchResult, NormalizedTransaction } from '../types';
 
+const CORS_PROXY = 'https://corsproxy.io/?';
+
 interface VoyagerTxResponse {
   items: Array<{
     hash: string;
@@ -65,14 +67,13 @@ export class ExtendedAdapter implements ChainAdapter {
     
     const url = `${this.voyagerApiBase}/txns?to=${normalizedAddress}&ps=${limit}&p=${page}`;
     
-    const response = await fetch(url, {
+    const response = await fetch(CORS_PROXY + encodeURIComponent(url), {
       headers: { 
         'Accept': 'application/json',
       },
     });
 
     if (!response.ok) {
-      // If Voyager fails, try alternative approach
       console.warn('Voyager API failed, trying StarkScan...');
       return this.fetchFromStarkScan(normalizedAddress, page, limit);
     }
@@ -90,7 +91,7 @@ export class ExtendedAdapter implements ChainAdapter {
     const url = `https://api.starkscan.co/api/v0/transactions?contract_address=${address}&limit=${limit}&page=${page}`;
     
     try {
-      const response = await fetch(url, {
+      const response = await fetch(CORS_PROXY + encodeURIComponent(url), {
         headers: { 
           'Accept': 'application/json',
         },

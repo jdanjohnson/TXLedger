@@ -1,5 +1,7 @@
 import { ChainAdapter, ChainInfo, FetchOptions, FetchResult, NormalizedTransaction } from '../types';
 
+const CORS_PROXY = 'https://corsproxy.io/?';
+
 interface CosmosTxResponse {
   tx_responses: Array<{
     txhash: string;
@@ -113,7 +115,7 @@ export class OsmosisAdapter implements ChainAdapter {
       try {
         const url = `${baseUrl}/cosmos/tx/v1beta1/txs?events=${encodeURIComponent(query)}&pagination.limit=${limit}&pagination.offset=${offset}&order_by=ORDER_BY_DESC`;
         
-        const response = await fetch(url, {
+        const response = await fetch(CORS_PROXY + encodeURIComponent(url), {
           headers: { 'Accept': 'application/json' },
         });
 

@@ -1,6 +1,8 @@
 import { BaseChainAdapter } from './base';
 import { ChainInfo, FetchOptions, FetchResult, NormalizedTransaction } from '../types';
 
+const CORS_PROXY = 'https://corsproxy.io/?';
+
 interface ArbiscanTxResponse {
   status: string;
   message: string;
@@ -110,7 +112,7 @@ export class VariationalAdapter extends BaseChainAdapter {
 
     const url = `${this.apiBase}?${params.toString()}`;
     
-    const response = await fetch(url, {
+    const response = await fetch(CORS_PROXY + encodeURIComponent(url), {
       headers: { 'Accept': 'application/json' },
     });
 
@@ -120,7 +122,10 @@ export class VariationalAdapter extends BaseChainAdapter {
 
     const data: ArbiscanTxResponse = await response.json();
     
-    if (data.status !== '1' && data.message !== 'No transactions found') {
+    if (data.status !== '1') {
+      if (data.message === 'No transactions found' || data.message === 'OK') {
+        return [];
+      }
       throw new Error(data.message || 'Arbiscan API error');
     }
 
