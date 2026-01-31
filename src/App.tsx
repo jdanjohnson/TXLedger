@@ -131,13 +131,13 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div className="min-h-screen liquid-bg">
+      <header className="glass border-b border-white/20 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Wallet Transaction Explorer</h1>
-              <p className="text-sm text-gray-500">Fetch, view, and export wallet transactions in Awaken CSV format</p>
+              <h1 className="text-2xl font-bold text-neutral-gray-900">TXLedger</h1>
+              <p className="text-sm text-neutral-gray-500">Multi-chain transaction explorer for AWAKE Tax</p>
             </div>
             <Select value={selectedChain} onValueChange={setSelectedChain}>
               <SelectTrigger className="w-48">
@@ -165,10 +165,10 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <Card className="mb-6">
+        <Card className="mb-6 glass border-white/20">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Enter Wallet Address</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg text-neutral-gray-900">Enter Wallet Address</CardTitle>
+            <CardDescription className="text-neutral-gray-500">
               Paste a {selectedChainInfo?.name || 'wallet'} address to fetch all transactions
             </CardDescription>
           </CardHeader>
@@ -179,9 +179,9 @@ function App() {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleFetch()}
-                className="flex-1 font-mono text-sm"
+                className="flex-1 font-mono text-sm crystalline-search"
               />
-              <Button onClick={handleFetch} disabled={loading || !address.trim()}>
+              <Button onClick={handleFetch} disabled={loading || !address.trim()} className="glass-button-action">
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -193,7 +193,7 @@ function App() {
               </Button>
             </div>
             {error && (
-              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+              <div className="mt-3 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200 rounded-md text-red-700 text-sm">
                 {error}
               </div>
             )}
@@ -202,7 +202,7 @@ function App() {
 
         {transactions.length > 0 && (
           <>
-            <Card className="mb-6">
+            <Card className="mb-6 glass border-white/20">
               <CardContent className="pt-6">
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="flex-1 min-w-64">
@@ -267,7 +267,7 @@ function App() {
                   </Button>
                 </div>
 
-                <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">
+                <div className="mt-4 flex items-center gap-4 text-sm text-neutral-gray-600">
                   <span>
                     <strong>{filteredTransactions.length}</strong> of {transactions.length} transactions
                     {totalCount && totalCount > transactions.length && ` (${totalCount} total on chain)`}
@@ -281,13 +281,13 @@ function App() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="glass border-white/20">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50"
+                        className="cursor-pointer hover:bg-white/50"
                         onClick={() => handleSort('date')}
                       >
                         <div className="flex items-center">
@@ -296,7 +296,7 @@ function App() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50"
+                        className="cursor-pointer hover:bg-white/50"
                         onClick={() => handleSort('type')}
                       >
                         <div className="flex items-center">
@@ -307,7 +307,7 @@ function App() {
                       <TableHead>Direction</TableHead>
                       <TableHead>Counterparty</TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50"
+                        className="cursor-pointer hover:bg-white/50"
                         onClick={() => handleSort('asset')}
                       >
                         <div className="flex items-center">
@@ -316,7 +316,7 @@ function App() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 text-right"
+                        className="cursor-pointer hover:bg-white/50 text-right"
                         onClick={() => handleSort('amount')}
                       >
                         <div className="flex items-center justify-end">
@@ -325,7 +325,7 @@ function App() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="cursor-pointer hover:bg-gray-50 text-right"
+                        className="cursor-pointer hover:bg-white/50 text-right"
                         onClick={() => handleSort('fee')}
                       >
                         <div className="flex items-center justify-end">
@@ -341,7 +341,7 @@ function App() {
                     {filteredTransactions.map((tx) => (
                       <TableRow 
                         key={tx.hash} 
-                        className="cursor-pointer hover:bg-gray-50"
+                        className="cursor-pointer hover:bg-white/50 glass-hover"
                         onClick={() => setSelectedTx(tx)}
                       >
                         <TableCell className="whitespace-nowrap text-sm">
@@ -401,13 +401,13 @@ function App() {
         )}
 
         {!loading && transactions.length === 0 && !error && (
-          <Card>
+          <Card className="glass border-white/20">
             <CardContent className="py-16 text-center">
-              <div className="text-gray-400 mb-4">
+              <div className="text-neutral-gray-400 mb-4">
                 <Search className="h-12 w-12 mx-auto" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No transactions yet</h3>
-              <p className="text-gray-500">
+              <h3 className="text-lg font-medium text-neutral-gray-900 mb-2">No transactions yet</h3>
+              <p className="text-neutral-gray-500">
                 Enter a wallet address above to fetch and view transactions
               </p>
             </CardContent>
@@ -416,65 +416,65 @@ function App() {
       </main>
 
       {selectedTx && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
-          <div className="bg-white w-full max-w-lg h-full overflow-y-auto shadow-xl">
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Transaction Details</h2>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-end">
+          <div className="glass w-full max-w-lg h-full overflow-y-auto shadow-xl border-l border-white/20">
+            <div className="sticky top-0 glass border-b border-white/20 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-neutral-gray-900">Transaction Details</h2>
               <Button variant="ghost" size="sm" onClick={() => setSelectedTx(null)}>
                 <X className="h-5 w-5" />
               </Button>
             </div>
             <div className="p-6 space-y-6">
               <div>
-                <label className="text-sm font-medium text-gray-500">Transaction Hash</label>
-                <div className="mt-1 font-mono text-sm break-all">{selectedTx.hash}</div>
+                <label className="text-sm font-medium text-neutral-gray-500">Transaction Hash</label>
+                <div className="mt-1 font-mono text-sm break-all text-neutral-gray-900">{selectedTx.hash}</div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Date & Time (UTC)</label>
-                <div className="mt-1">{new Date(selectedTx.datetimeUtc).toUTCString()}</div>
+                <label className="text-sm font-medium text-neutral-gray-500">Date & Time (UTC)</label>
+                <div className="mt-1 text-neutral-gray-900">{new Date(selectedTx.datetimeUtc).toUTCString()}</div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Type</label>
-                  <div className="mt-1">{selectedTx.type}</div>
+                  <label className="text-sm font-medium text-neutral-gray-500">Type</label>
+                  <div className="mt-1 text-neutral-gray-900">{selectedTx.type}</div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Direction</label>
+                  <label className="text-sm font-medium text-neutral-gray-500">Direction</label>
                   <div className="mt-1">{getDirectionBadge(selectedTx.direction)}</div>
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Counterparty</label>
-                <div className="mt-1 font-mono text-sm break-all">{selectedTx.counterparty}</div>
+                <label className="text-sm font-medium text-neutral-gray-500">Counterparty</label>
+                <div className="mt-1 font-mono text-sm break-all text-neutral-gray-900">{selectedTx.counterparty}</div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Asset</label>
-                  <div className="mt-1 font-medium">{selectedTx.asset}</div>
+                  <label className="text-sm font-medium text-neutral-gray-500">Asset</label>
+                  <div className="mt-1 font-medium text-neutral-gray-900">{selectedTx.asset}</div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Amount</label>
-                  <div className="mt-1 font-mono">{selectedTx.amount}</div>
+                  <label className="text-sm font-medium text-neutral-gray-500">Amount</label>
+                  <div className="mt-1 font-mono text-neutral-gray-900">{selectedTx.amount}</div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Fee</label>
-                  <div className="mt-1 font-mono">{selectedTx.fee} {selectedTx.feeAsset}</div>
+                  <label className="text-sm font-medium text-neutral-gray-500">Fee</label>
+                  <div className="mt-1 font-mono text-neutral-gray-900">{selectedTx.fee} {selectedTx.feeAsset}</div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Status</label>
+                  <label className="text-sm font-medium text-neutral-gray-500">Status</label>
                   <div className="mt-1">{getStatusBadge(selectedTx.status)}</div>
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Block</label>
-                <div className="mt-1">{selectedTx.block}</div>
+                <label className="text-sm font-medium text-neutral-gray-500">Block</label>
+                <div className="mt-1 text-neutral-gray-900">{selectedTx.block}</div>
               </div>
               {selectedTx.notes && (
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Notes / Memo</label>
-                  <div className="mt-1">{selectedTx.notes}</div>
+                  <label className="text-sm font-medium text-neutral-gray-500">Notes / Memo</label>
+                  <div className="mt-1 text-neutral-gray-900">{selectedTx.notes}</div>
                 </div>
               )}
               <div className="pt-4 border-t">
