@@ -30,18 +30,13 @@ export function LandingPage({ onFetch, initialChain }: LandingPageProps) {
             </div>
             <h2 className="text-xl font-bold tracking-tight grotesk-tight text-slate-900">TXLedger</h2>
           </div>
-          <nav className="hidden md:flex items-center space-x-10">
-            <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap" href="https://github.com/jdanjohnson/TXLedger" target="_blank" rel="noopener noreferrer">GitHub</a>
-            <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap" href="#">Docs</a>
-            <a className="text-[13px] font-semibold text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap" href="#">API</a>
-          </nav>
         </div>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center">
         <section className="w-full max-w-[1100px] px-8 flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full badge-glass mb-12">
-            <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Open Source Explorer</span>
           </div>
           
@@ -169,7 +164,9 @@ export function LandingPage({ onFetch, initialChain }: LandingPageProps) {
             </div>
           </div>
           <div className="flex items-center gap-8 mt-6 md:mt-0">
-            <span className="text-[12px] font-semibold text-slate-400">GNU GPLv3 License</span>
+            <a href="https://jadanj.com/experiments" target="_blank" rel="noopener noreferrer" className="text-[11px] text-slate-300 hover:text-slate-500 transition-colors">
+              by Ja'dan Johnson
+            </a>
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/5 border border-green-500/10">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
               <span className="text-[10px] font-bold text-green-600 uppercase tracking-tighter">Open Source</span>
