@@ -5,7 +5,7 @@ export class BittensorAdapter implements ChainAdapter {
     id: 'bittensor',
     name: 'Bittensor',
     symbol: 'TAO',
-    logo: 'https://raw.githubusercontent.com/nickspaargaren/no-google/master/images/bittensor.png',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/1/14/Bittensor.svg',
     explorerUrl: 'https://taostats.io',
     addressRegex: /^5[a-zA-Z0-9]{47}$/,
     addressPlaceholder: '5FFApaS75bv5pJHfAp2FVLBj9ZaXuFDjEypsaBNc1wCfe52v',
