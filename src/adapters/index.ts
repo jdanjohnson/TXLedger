@@ -6,6 +6,9 @@ import { BittensorAdapter } from './bittensor';
 import { RoninAdapter } from './ronin';
 import { VariationalAdapter } from './variational';
 import { ExtendedAdapter } from './extended';
+import { HyperliquidAdapter } from './hyperliquid';
+import { DydxAdapter } from './dydx';
+import { GmxAdapter } from './gmx';
 
 const evmAdapters = generateEvmAdapters();
 const cosmosAdapters = generateCosmosAdapters();
@@ -19,6 +22,9 @@ export const adapters: Record<string, ChainAdapter> = {
   ronin: new RoninAdapter(),
   variational: new VariationalAdapter(),
   extended: new ExtendedAdapter(),
+  hyperliquid: new HyperliquidAdapter(),
+  dydx: new DydxAdapter(),
+  gmx: new GmxAdapter(),
 };
 
 export const getAdapter = (chainId: string): ChainAdapter | undefined => {
@@ -34,6 +40,9 @@ export {
   RoninAdapter, 
   VariationalAdapter, 
   ExtendedAdapter,
+  HyperliquidAdapter,
+  DydxAdapter,
+  GmxAdapter,
   generateEvmAdapters,
   generateCosmosAdapters,
   generateSubstrateAdapters,

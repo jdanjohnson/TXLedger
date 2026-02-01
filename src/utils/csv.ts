@@ -12,13 +12,15 @@ export const formatDateForAwaken = (isoDate: string): string => {
 };
 
 export const transactionToAwakenRow = (tx: NormalizedTransaction): AwakenCsvRow => {
+  const paymentToken = tx.paymentToken || tx.feeAsset;
+  
   return {
     Date: formatDateForAwaken(tx.datetimeUtc),
     Asset: tx.asset,
     Amount: tx.amount,
     Fee: tx.fee,
     'P&L': tx.pnl || '0',
-    'Payment Token': tx.feeAsset,
+    'Payment Token': paymentToken,
     ID: tx.hash.slice(0, 16),
     Notes: tx.notes || `${tx.type} - ${tx.direction}`,
     Tag: tx.tag || '',

@@ -1,6 +1,6 @@
-# Wallet Transaction Explorer
+# TXLedger
 
-A multi-chain blockchain wallet transaction explorer that fetches, displays, and exports wallet transactions in Awaken CSV format for tax reporting.
+A multi-chain blockchain wallet transaction explorer that fetches, displays, and exports wallet transactions in Awaken CSV format for tax reporting. Built for [AWAKE Tax](https://awaketax.com).
 
 ## Features
 
@@ -321,7 +321,9 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ## License
 
-MIT License - see [LICENSE](./LICENSE) for details.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](./LICENSE) file for details.
+
+TXLedger is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 ## Roadmap
 
