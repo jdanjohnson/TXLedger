@@ -1,7 +1,8 @@
 import { ChainAdapter } from '../types';
-import { PolkadotAdapter } from './polkadot';
+import { generateEvmAdapters } from './evm-factory';
+import { generateCosmosAdapters } from './cosmos-factory';
+import { generateSubstrateAdapters } from './substrate-factory';
 import { BittensorAdapter } from './bittensor';
-import { OsmosisAdapter } from './osmosis';
 import { RoninAdapter } from './ronin';
 import { VariationalAdapter } from './variational';
 import { ExtendedAdapter } from './extended';
@@ -9,10 +10,15 @@ import { HyperliquidAdapter } from './hyperliquid';
 import { DydxAdapter } from './dydx';
 import { GmxAdapter } from './gmx';
 
+const evmAdapters = generateEvmAdapters();
+const cosmosAdapters = generateCosmosAdapters();
+const substrateAdapters = generateSubstrateAdapters();
+
 export const adapters: Record<string, ChainAdapter> = {
-  polkadot: new PolkadotAdapter(),
+  ...evmAdapters,
+  ...cosmosAdapters,
+  ...substrateAdapters,
   bittensor: new BittensorAdapter(),
-  osmosis: new OsmosisAdapter(),
   ronin: new RoninAdapter(),
   variational: new VariationalAdapter(),
   extended: new ExtendedAdapter(),
@@ -29,5 +35,15 @@ export const getSupportedChains = () => {
   return Object.values(adapters).map(adapter => adapter.chainInfo);
 };
 
-export { PolkadotAdapter, BittensorAdapter, OsmosisAdapter, RoninAdapter, VariationalAdapter, ExtendedAdapter };
-export { HyperliquidAdapter, DydxAdapter, GmxAdapter };
+export { 
+  BittensorAdapter, 
+  RoninAdapter, 
+  VariationalAdapter, 
+  ExtendedAdapter,
+  HyperliquidAdapter,
+  DydxAdapter,
+  GmxAdapter,
+  generateEvmAdapters,
+  generateCosmosAdapters,
+  generateSubstrateAdapters,
+};
