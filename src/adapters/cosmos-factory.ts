@@ -1,6 +1,26 @@
 import { ChainAdapter, ChainInfo, FetchOptions, FetchResult, NormalizedTransaction } from '../types';
 
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+// Check if we're on a deployed environment with CORS proxy support
+const isDeployedWithProxy = () => {
+  if (typeof window === 'undefined') return false;
+  // Vercel deployments or custom domains have the proxy available
+  return window.location.hostname.includes('vercel.app') || 
+         !window.location.hostname.includes('localhost');
+};
+
+// Use local Vercel proxy when deployed, fallback to allorigins for local dev
+const getProxyUrl = () => {
+  if (isDeployedWithProxy()) {
+    return '/api/proxy?url=';
+  }
+  // Fallback to allorigins for local development
+  return 'https://api.allorigins.win/raw?url=';
+};
+
+const CORS_PROXY = getProxyUrl();
+
+// Cosmos chains are fully supported when deployed with proxy, limited otherwise
+const IS_COSMOS_LIMITED = !isDeployedWithProxy();
 
 export interface CosmosChainConfig {
   id: string;
@@ -238,7 +258,7 @@ export function createCosmosAdapter(config: CosmosChainConfig): ChainAdapter {
     explorerUrl: config.explorerUrl,
     addressRegex: new RegExp(`^${config.addressPrefix}1[a-z0-9]{38}$`),
     addressPlaceholder: config.addressPlaceholder,
-    limited: true,
+    limited: IS_COSMOS_LIMITED,
   };
 
   async function fetchTxsFromLCD(

@@ -2,6 +2,10 @@
 
 A multi-chain blockchain wallet transaction explorer that fetches, displays, and exports wallet transactions in Awaken CSV format for tax reporting. Built for [AWAKE Tax](https://awaketax.com).
 
+> **Live Demo**: [txledger.jadan.dev](https://txledger.jadan.dev) - Full support for all 25+ chains including Cosmos ecosystem. The demo deployment includes a built-in CORS proxy, so all chains work out of the box.
+>
+> **Self-Hosted Note**: If you're deploying your own instance, you'll need to set up a CORS proxy for Cosmos chains. See [Vercel Deployment](#vercel-deployment-recommended) below for the easiest setup.
+
 ## Features
 
 - **Multi-Chain Support**: Query transactions across multiple blockchains from a single interface
@@ -43,14 +47,16 @@ TXLedger supports **25+ blockchains** across multiple ecosystems using a config-
 
 | Chain | Status | API | Notes |
 |-------|--------|-----|-------|
-| Osmosis | Limited | Cosmos LCD REST | Requires CORS proxy |
-| Cosmos Hub | Limited | Cosmos LCD REST | Requires CORS proxy |
-| Celestia | Limited | Cosmos LCD REST | Requires CORS proxy |
-| dYdX Chain | Limited | Cosmos LCD REST | Requires CORS proxy |
-| Sei | Limited | Cosmos LCD REST | Requires CORS proxy |
-| Injective | Limited | Cosmos LCD REST | Requires CORS proxy |
-| Neutron | Limited | Cosmos LCD REST | Requires CORS proxy |
-| Noble | Limited | Cosmos LCD REST | Requires CORS proxy |
+| Osmosis | Active | Cosmos LCD REST | Full support on demo |
+| Cosmos Hub | Active | Cosmos LCD REST | Full support on demo |
+| Celestia | Active | Cosmos LCD REST | Full support on demo |
+| dYdX Chain | Active | Cosmos LCD REST | Full support on demo |
+| Sei | Active | Cosmos LCD REST | Full support on demo |
+| Injective | Active | Cosmos LCD REST | Full support on demo |
+| Neutron | Active | Cosmos LCD REST | Full support on demo |
+| Noble | Active | Cosmos LCD REST | Full support on demo |
+
+> **Self-hosted deployments**: Cosmos chains require a CORS proxy. The demo at [txledger.jadan.dev](https://txledger.jadan.dev) includes this automatically. For your own deployment, see [Vercel Deployment](#vercel-deployment-recommended).
 
 ### Other Chains
 
@@ -136,52 +142,83 @@ Some blockchain APIs don't support CORS (Cross-Origin Resource Sharing), which p
 
 ### Affected Chains
 
-| Chain | API | Issue |
-|-------|-----|-------|
-| Osmosis | Cosmos LCD REST | No CORS headers on any public LCD endpoint |
-| Extended | Voyager/StarkScan | No CORS headers on Starknet explorer APIs |
+| Chain | API | Issue | Demo Status |
+|-------|-----|-------|-------------|
+| All Cosmos chains | Cosmos LCD REST | No CORS headers on public LCD endpoints | Working on demo |
+| Extended | Voyager/StarkScan | No CORS headers on Starknet explorer APIs | Requires proxy |
 
 ### How to Enable Full Support
 
-To enable full functionality for Osmosis and Extended, you need to set up a backend proxy. Here are the options:
+The demo at [txledger.jadan.dev](https://txledger.jadan.dev) includes a built-in CORS proxy, so all chains work automatically. For self-hosted deployments, you need to set up a backend proxy.
 
-#### Option 1: Vercel Edge Functions (Recommended for Vercel deployments)
+## Vercel Deployment (Recommended)
 
-Create `api/proxy.ts` in your project:
+This is the easiest way to deploy TXLedger with full Cosmos chain support. The repository includes a pre-configured Vercel serverless function that handles CORS proxying automatically.
 
+### Step 1: Fork and Deploy
+
+1. Fork this repository to your GitHub account
+2. Go to [vercel.com](https://vercel.com) and import your forked repository
+3. Deploy with default settings - no configuration needed!
+
+The app will automatically detect it's running on Vercel and use the built-in proxy for Cosmos chains.
+
+### Step 2: Custom Domain (Optional)
+
+1. In Vercel dashboard, go to your project settings
+2. Add your custom domain under "Domains"
+3. The proxy will work automatically on your custom domain
+
+### How It Works
+
+The repository includes two files that enable the CORS proxy:
+
+**`api/proxy.ts`** - Vercel serverless function:
 ```typescript
-import { NextRequest, NextResponse } from 'next/server';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(req: NextRequest) {
-  const url = req.nextUrl.searchParams.get('url');
-  if (!url) {
-    return NextResponse.json({ error: 'Missing url parameter' }, { status: 400 });
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  
+  const { url } = req.query;
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ error: 'Missing url parameter' });
   }
 
   try {
-    const response = await fetch(url, {
-      headers: { 'Accept': 'application/json' },
-    });
+    const response = await fetch(decodeURIComponent(url));
     const data = await response.json();
-    return NextResponse.json(data, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      },
-    });
+    return res.status(200).json(data);
   } catch (error) {
-    return NextResponse.json({ error: 'Proxy request failed' }, { status: 500 });
+    return res.status(500).json({ error: 'Proxy request failed' });
   }
 }
 ```
 
-Then update the adapters to use `/api/proxy?url=` instead of direct API calls.
+**`vercel.json`** - Route configuration:
+```json
+{
+  "rewrites": [{ "source": "/api/:path*", "destination": "/api/:path*" }],
+  "headers": [{
+    "source": "/api/(.*)",
+    "headers": [
+      { "key": "Access-Control-Allow-Origin", "value": "*" },
+      { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" }
+    ]
+  }]
+}
+```
 
-#### Option 2: Cloudflare Workers
+The `cosmos-factory.ts` adapter automatically detects when running on Vercel or a custom domain and routes requests through `/api/proxy` instead of the fallback public proxy.
+
+## Alternative Deployment Options
+
+If you're not using Vercel, here are other ways to set up a CORS proxy:
+
+### Cloudflare Workers
 
 Deploy a simple proxy worker:
 
@@ -205,7 +242,7 @@ async function handleRequest(request) {
 }
 ```
 
-#### Option 3: Self-hosted Proxy
+### Self-hosted Proxy
 
 Run a simple Express proxy server:
 
@@ -344,16 +381,70 @@ The export follows Awaken tax software format:
 
 | Column | Description |
 |--------|-------------|
-| Date | Transaction timestamp (ISO 8601) |
-| Asset | Token symbol (e.g., DOT, TAO, RON) |
-| Amount | Transaction amount |
+| Date | Transaction timestamp (MM/DD/YYYY HH:MM:SS UTC) |
+| Asset | Token symbol (e.g., DOT, TAO, RON, ETH-PERP) |
+| Amount | Transaction amount or position size |
 | Fee | Transaction fee |
-| P&L | Profit/Loss (empty by default) |
-| Payment Token | Fee token symbol |
-| ID | Unique transaction identifier |
-| Notes | User notes |
-| Tag | Transaction tag |
-| Transaction Hash | Blockchain transaction hash |
+| P&L | Profit/Loss (see perps section below) |
+| Payment Token | Settlement token for P&L and fees |
+| ID | Unique transaction identifier (first 16 chars of hash) |
+| Notes | Transaction type and direction |
+| Tag | Transaction classification tag |
+| Transaction Hash | Full blockchain transaction hash |
+
+### CSV Differences: Regular Chains vs Perps
+
+The CSV export format is the same for all chains, but the data differs significantly between regular blockchain transactions and perpetual/derivatives trading:
+
+#### Regular Chains (EVM, Substrate, Cosmos)
+
+For standard blockchain transactions (transfers, swaps, staking, etc.):
+
+| Field | Typical Value | Example |
+|-------|---------------|---------|
+| Asset | Native token or transferred token | `ETH`, `DOT`, `OSMO` |
+| Amount | Transfer amount | `1.5` |
+| P&L | Always `0` | `0` |
+| Payment Token | Same as fee asset | `ETH` |
+| Tag | Empty | `` |
+| Notes | `{type} - {direction}` | `transfer - out` |
+
+#### Perps Chains (Hyperliquid, dYdX, GMX)
+
+For perpetual futures and derivatives trading:
+
+| Field | Typical Value | Example |
+|-------|---------------|---------|
+| Asset | Market symbol with `-PERP` suffix | `ETH-PERP`, `BTC-PERP` |
+| Amount | Position size in contracts/units | `0.5` |
+| P&L | Realized profit/loss in settlement token | `-125.50` or `340.25` |
+| Payment Token | Settlement token (USDC, USDT, etc.) | `USDC` |
+| Tag | Position action type | `open_position`, `close_position`, `funding_payment` |
+| Notes | Detailed trade description | `Long ETH-PERP 0.5 @ 2450.00` |
+
+#### Perps Tag Values
+
+| Tag | Description | P&L Behavior |
+|-----|-------------|--------------|
+| `open_position` | Opening a new long or short position | P&L = 0 |
+| `close_position` | Closing an existing position | P&L = realized gain/loss |
+| `funding_payment` | Periodic funding rate payment | P&L = funding received/paid |
+
+#### Example CSV Rows
+
+**Regular chain (Ethereum transfer):**
+```csv
+Date,Asset,Amount,Fee,P&L,Payment Token,ID,Notes,Tag,Transaction Hash
+01/15/2026 14:30:00,ETH,1.5,0.002,0,ETH,0x1234567890ab,transfer - out,,0x1234567890abcdef...
+```
+
+**Perps chain (Hyperliquid close position):**
+```csv
+Date,Asset,Amount,Fee,P&L,Payment Token,ID,Notes,Tag,Transaction Hash
+01/15/2026 14:30:00,ETH-PERP,0.5,1.25,340.50,USDC,0xabcd12345678,close position - in,close_position,0xabcd12345678efgh...
+```
+
+This distinction is important for tax reporting: regular transactions typically represent cost basis events, while perps P&L represents realized capital gains/losses that may be taxed differently.
 
 ## Test Addresses
 
