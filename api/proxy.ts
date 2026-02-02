@@ -52,18 +52,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: 'Domain not allowed' });
     }
 
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+    };
+    
+    // Only add Content-Type for POST requests
+    if (req.method === 'POST') {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const response = await fetch(decodedUrl, {
       method: req.method === 'POST' ? 'POST' : 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: req.method === 'POST' ? JSON.stringify(req.body) : undefined,
     });
 
     if (!response.ok) {
+      // Try to get error details from response body
+      let errorBody = '';
+      try {
+        errorBody = await response.text();
+      } catch {
+        // Ignore if we can't read the body
+      }
+      console.error(`Upstream error: ${response.status} ${response.statusText}`, errorBody);
       return res.status(response.status).json({ 
-        error: `Upstream error: ${response.status} ${response.statusText}` 
+        error: `Upstream error: ${response.status} ${response.statusText}`,
+        upstream: errorBody.slice(0, 500) // Include first 500 chars of error
       });
     }
 
