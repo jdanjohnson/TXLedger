@@ -378,4 +378,3 @@ TXLedger is free software: you can redistribute it and/or modify it under the te
 - [Taostats](https://taostats.io) for Bittensor API
 - [Ronin](https://roninchain.com) for Ronin Explorer API
 - [Numia](https://numia.xyz) for Cosmos chain APIs
-- [Vidulum](https://github.com/corey-code/vidulum-app) for Cosmos SDK patterns inspiration
