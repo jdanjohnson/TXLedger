@@ -274,7 +274,8 @@ export function createCosmosAdapter(config: CosmosChainConfig): ChainAdapter {
     
     for (const baseUrl of config.lcdEndpoints) {
       try {
-        const url = `${baseUrl}/cosmos/tx/v1beta1/txs?events=${encodeURIComponent(query)}&pagination.limit=${limit}&pagination.offset=${offset}&order_by=ORDER_BY_DESC`;
+        // Use 'query' parameter instead of 'events' for Cosmos SDK LCD API
+        const url = `${baseUrl}/cosmos/tx/v1beta1/txs?query=${encodeURIComponent(query)}&pagination.limit=${limit}&pagination.offset=${offset}&order_by=ORDER_BY_DESC`;
         
         const response = await fetch(CORS_PROXY + encodeURIComponent(url), {
           headers: { 'Accept': 'application/json' },
