@@ -45,18 +45,18 @@ TXLedger supports **25+ blockchains** across multiple ecosystems using a config-
 
 ### Cosmos Chains
 
+> **Note**: The demo at [txledger.jadan.dev](https://txledger.jadan.dev) supports all Cosmos chains. For self-hosted deployments, you must enable a CORS proxy (see [CORS Limitations](#cors-limitations)).
+
 | Chain | Status | API | Notes |
 |-------|--------|-----|-------|
-| Osmosis | Active | Cosmos LCD REST | Full support on demo |
-| Cosmos Hub | Active | Cosmos LCD REST | Full support on demo |
-| Celestia | Active | Cosmos LCD REST | Full support on demo |
-| dYdX Chain | Active | Cosmos LCD REST | Full support on demo |
-| Sei | Active | Cosmos LCD REST | Full support on demo |
-| Injective | Active | Cosmos LCD REST | Full support on demo |
-| Neutron | Active | Cosmos LCD REST | Full support on demo |
-| Noble | Active | Cosmos LCD REST | Full support on demo |
-
-> **Self-hosted deployments**: Cosmos chains require a CORS proxy. The demo at [txledger.jadan.dev](https://txledger.jadan.dev) includes this automatically. For your own deployment, see [Vercel Deployment](#vercel-deployment-recommended).
+| Osmosis | Active | Cosmos LCD REST | Requires CORS proxy |
+| Cosmos Hub | Active | Cosmos LCD REST | Requires CORS proxy |
+| Celestia | Active | Cosmos LCD REST | Requires CORS proxy |
+| dYdX Chain | Active | Cosmos LCD REST | Requires CORS proxy |
+| Sei | Active | Cosmos LCD REST | Requires CORS proxy |
+| Injective | Active | Cosmos LCD REST | Requires CORS proxy |
+| Neutron | Active | Cosmos LCD REST | Requires CORS proxy |
+| Noble | Active | Cosmos LCD REST | Requires CORS proxy |
 
 ### Other Chains
 
