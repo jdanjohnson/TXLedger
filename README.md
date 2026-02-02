@@ -4,7 +4,7 @@ A multi-chain blockchain wallet transaction explorer that fetches, displays, and
 
 > **Live Demo**: [txledger.jadan.dev](https://txledger.jadan.dev) - Full support for all 25+ chains including Cosmos ecosystem. The demo deployment includes a built-in CORS proxy, so all chains work out of the box.
 >
-> **Self-Hosted Note**: If you're deploying your own instance, you'll need to set up a CORS proxy for Cosmos chains. See [Vercel Deployment](#vercel-deployment-recommended) below for the easiest setup.
+> **Deployment**: This project is optimized for deployment on [Vercel](https://vercel.com). The included `api/proxy.ts` serverless function and `vercel.json` configuration handle CORS proxying for Cosmos chains automatically. For other platforms, you'll need to adapt the proxy setup.
 
 ## Features
 
