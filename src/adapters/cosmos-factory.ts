@@ -416,7 +416,7 @@ export const cosmosChainConfigs: CosmosChainConfig[] = [
     lcdEndpoints: [
       'https://cosmos-rest.publicnode.com',
       'https://rest.cosmos.directory/cosmoshub',
-      'https://cosmoshub-api.polkachu.com',
+      'https://cosmos-api.polkachu.com',
     ],
     decimals: 6,
     denom: 'uatom',

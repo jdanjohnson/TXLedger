@@ -28,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       'rest-osmosis.ecostake.com',
       'osmosis-api.polkachu.com',
       'cosmos-rest.publicnode.com',
-      'cosmoshub-api.polkachu.com',
+      'cosmos-api.polkachu.com',
       'rest.cosmos.directory',
       'celestia-lcd.publicnode.com',
       'celestia-api.polkachu.com',
