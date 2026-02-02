@@ -268,30 +268,41 @@ export function createCosmosAdapter(config: CosmosChainConfig): ChainAdapter {
     offset: number
   ): Promise<NormalizedTransaction[]> {
     const eventKey = direction === 'sender' ? 'message.sender' : 'transfer.recipient';
-    const query = `${eventKey}='${address}'`;
+    const queryStr = `${eventKey}='${address}'`;
     
     let lastError: Error | null = null;
     
     for (const baseUrl of config.lcdEndpoints) {
-      try {
-        // Use 'query' parameter instead of 'events' for Cosmos SDK LCD API
-        const url = `${baseUrl}/cosmos/tx/v1beta1/txs?query=${encodeURIComponent(query)}&pagination.limit=${limit}&pagination.offset=${offset}&order_by=ORDER_BY_DESC`;
-        
-        const response = await fetch(CORS_PROXY + encodeURIComponent(url), {
-          headers: { 'Accept': 'application/json' },
-        });
+      // Try both 'query' and 'events' parameters since different Cosmos SDK versions use different params
+      const urlVariants = [
+        `${baseUrl}/cosmos/tx/v1beta1/txs?query=${encodeURIComponent(queryStr)}&pagination.limit=${limit}&pagination.offset=${offset}&order_by=ORDER_BY_DESC`,
+        `${baseUrl}/cosmos/tx/v1beta1/txs?events=${encodeURIComponent(queryStr)}&pagination.limit=${limit}&pagination.offset=${offset}&order_by=ORDER_BY_DESC`,
+      ];
+      
+      for (const url of urlVariants) {
+        try {
+          const response = await fetch(CORS_PROXY + encodeURIComponent(url), {
+            headers: { 'Accept': 'application/json' },
+          });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data: CosmosTxResponse = await response.json();
+          
+          // Check if response indicates invalid query format (some chains return success but with error in body)
+          if ('code' in data && (data as unknown as { code: number }).code !== 0) {
+            throw new Error('Invalid query format');
+          }
+          
+          return normalizeTxs(data.tx_responses || [], address, config);
+        } catch (error) {
+          lastError = error as Error;
+          continue;
         }
-
-        const data: CosmosTxResponse = await response.json();
-        return normalizeTxs(data.tx_responses || [], address, config);
-      } catch (error) {
-        lastError = error as Error;
-        console.warn(`${config.name} LCD endpoint ${baseUrl} failed:`, error);
-        continue;
       }
+      console.warn(`${config.name} LCD endpoint ${baseUrl} failed:`, lastError);
     }
 
     throw lastError || new Error(`All ${config.name} LCD endpoints failed`);
@@ -403,10 +414,9 @@ export const cosmosChainConfigs: CosmosChainConfig[] = [
     addressPrefix: 'cosmos',
     addressPlaceholder: 'cosmos1clpqr4nrk4khgkxj78fcwwh6dl3uw4epasmvnj',
     lcdEndpoints: [
-      'https://lcd-cosmoshub.keplr.app',
-      'https://cosmos-lcd.quickapi.com',
-      'https://rest.cosmos.directory/cosmoshub',
       'https://cosmos-rest.publicnode.com',
+      'https://rest.cosmos.directory/cosmoshub',
+      'https://cosmoshub-api.polkachu.com',
     ],
     decimals: 6,
     denom: 'uatom',
